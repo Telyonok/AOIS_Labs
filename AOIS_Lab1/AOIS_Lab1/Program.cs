@@ -26,6 +26,7 @@
 		{
 			var firstNumber = BinaryConverter.AssembleBinaryFloatString(mantissa1, initialFloat1Exp, 24, 8);
 			var secondNumber = BinaryConverter.AssembleBinaryFloatString(mantissa2, initialFloat2Exp, 24, 8);
+			Console.WriteLine($"\nПервое число: {firstNumber}\nВторое число: {secondNumber}");
 			var result = BinaryCalculator.SumFloatingPointNumbers(firstNumber, secondNumber, 24, 8);
 
 			Console.WriteLine($"\nСумма = {result}");
