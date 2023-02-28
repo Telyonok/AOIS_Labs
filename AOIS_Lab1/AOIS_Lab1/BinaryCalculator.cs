@@ -1,7 +1,4 @@
-﻿using System.Numerics;
-using System.Text;
-
-namespace AOIS_Lab1
+﻿namespace AOIS_Lab1
 {
 	internal static class BinaryCalculator
 	{
@@ -18,13 +15,9 @@ namespace AOIS_Lab1
 				sum += binary2[i] - '0';
 
 				if (sum % 2 == 0)
-				{
 					result = "0" + result;
-				}
 				else
-				{
 					result = "1" + result;
-				}
 
 				carry = sum / 2;
 			}
@@ -57,13 +50,9 @@ namespace AOIS_Lab1
 			int dividendInt = BinaryConverter.TranslateBinaryStringToDex(dividend);
 			int divisorInt = BinaryConverter.TranslateBinaryStringToDex(divisor);
 
-			int quotientInt = dividendInt / divisorInt;
-			int remainderInt = dividendInt % divisorInt;
+			float resultDex = (float)dividendInt / divisorInt;
 
-			string quotient = BinaryConverter.TranslateDexToBinaryString(quotientInt, Code.additional);
-			string remainder = BinaryConverter.TranslateDexToBinaryString(remainderInt, Code.additional);
-
-			return quotient + "." + remainder;
+			return BinaryConverter.TranslateDexFloatToBinaryFloat(resultDex);
 		}
 
 		internal static string Calculate(string binaryX1, string binaryX2, Operation operation, Code code)
@@ -92,57 +81,68 @@ namespace AOIS_Lab1
 			throw new Exception();
 		}
 
-		internal static string SumFloatingPointNumbers(string binaryNumber1, string binaryNumber2, int mantissaBits, int exponentBits)
+		internal static string SumFloatingPointNumbers(string num1, string num2)
 		{
-			int sign1 = int.Parse(binaryNumber1.Substring(0, 1));
-			int exponent1 = Convert.ToInt32(binaryNumber1.Substring(1, exponentBits), 2);
-			int mantissa1 = Convert.ToInt32(binaryNumber1.Substring(exponentBits + 1), 2);
-			if (sign1 == 1)
+			string exponent1 = num1.Substring(1, 8);
+			string exponent2 = num2.Substring(1, 8);
+			string mantissa1 = "1" + num1.Substring(9, 23);
+			string mantissa2 = "1" + num2.Substring(9, 23);
+			int exponentDifference = Convert.ToInt32(exponent1, 2) - Convert.ToInt32(exponent2, 2);
+			if (exponentDifference > 0)
+				mantissa2 = ShiftRight(mantissa2, exponentDifference);
+			else if (exponentDifference < 0)
 			{
-				mantissa1 = -mantissa1;
+				mantissa1 = ShiftRight(mantissa1, -exponentDifference);
+				exponent1 = exponent2;
 			}
-
-			int sign2 = int.Parse(binaryNumber2.Substring(0, 1));
-			int exponent2 = Convert.ToInt32(binaryNumber2.Substring(1, exponentBits), 2);
-			int mantissa2 = Convert.ToInt32(binaryNumber2.Substring(exponentBits + 1), 2);
-			if (sign2 == 1)
+			string exponentSum = exponent1;
+			string mantisSum = SumBinary(mantissa1, mantissa2);
+			if (mantisSum[0] == '0')
+				Normalize(ref mantisSum, ref exponentSum);
+			else if (mantisSum.Length > 24)
 			{
-				mantissa2 = -mantissa2;
+				mantisSum = '0' + mantisSum.Substring(1);
+				exponentSum = SumBinary(exponentSum, "00000001");
 			}
+			return "0" + exponentSum + mantisSum.Substring(1);
+		}
 
-			int newExponent;
-			int exponentDiff = exponent1 - exponent2;
-			if (exponent1 > exponent2)
+		private static void Normalize(ref string mantisSum, ref string exponentSum)
+		{
+			int shift = 1;
+			while (mantisSum[shift] == '0')
 			{
-				newExponent = exponent1;
-				mantissa2 = mantissa2 >> exponentDiff;
+				shift++;
 			}
-			else
+			mantisSum = ShiftLeft(mantisSum, shift);
+			exponentSum = SumBinary(exponentSum, Convert.ToString(shift - 1, 2).PadLeft(8, '0'));
+		}
+
+		private static string SumBinary(string num1, string num2)
+		{
+			string result = "";
+			int carry = 0;
+			for (int i = num1.Length - 1; i >= 0; i--)
 			{
-				newExponent = exponent2;
-				mantissa1 = mantissa1 >> -exponentDiff;
+				int sum = Convert.ToInt32(num1[i].ToString()) + Convert.ToInt32(num2[i].ToString()) + carry;
+				result = (sum % 2).ToString() + result;
+				carry = sum / 2;
 			}
-
-			int newMantissa = mantissa1 + mantissa2;
-
-			while (newMantissa >= (1 << mantissaBits))
+			if (carry > 0)
 			{
-				newMantissa = newMantissa >> 1;
-				newExponent++;
+				result = "1" + result;
 			}
-			while (newMantissa < (1 << mantissaBits - 1))
-			{
-				newMantissa = newMantissa << 1;
-				newExponent--;
-			}
+			return result;
+		}
 
-			int newSign = newMantissa < 0 ? 1 : 0;
-			newMantissa = Math.Abs(newMantissa);
-			string newExponentBinary = Convert.ToString(newExponent, 2).PadLeft(exponentBits, '0');
-			string newMantissaBinary = Convert.ToString(newMantissa, 2).PadLeft(mantissaBits, '0');
-			string newBinaryNumber = newSign.ToString() + newExponentBinary + newMantissaBinary;
+		private static string ShiftRight(string num, int bits)
+		{
+			return new string('0', bits) + num.Substring(0, num.Length - bits);
+		}
 
-			return newBinaryNumber;
+		private static string ShiftLeft(string num, int bits)
+		{
+			return num.Substring(bits, num.Length - bits) + new string('0', bits);
 		}
 	}
 }
