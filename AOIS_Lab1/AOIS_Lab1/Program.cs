@@ -2,37 +2,41 @@
 {
 	class Program
 	{
-		const double initialX1 = 13;
-		const double initialX2 = 27;
-		const double mantissa1 = 0.1;
-		const double mantissa2 = 0.101;
-		const int initialFloat1Exp = 13;
-		const int initialFloat2Exp = 27;
-		const string float1 = "Мантисса = 0.1, порядок = 13";
-		const string float2 = "Мантисса = 0.101, порядок = 27";
 		static void Main()
 		{
 			if (GetUserInputVariant() == 2)
 			{
-				InitiateFloatSpecificWorkflow();
+				double initialFloatX1;
+				double initialFloatX2;
+				Console.WriteLine("Введите первое вещественное число");
+				initialFloatX1 = Convert.ToDouble(Console.ReadLine());
+				Console.WriteLine("Введите второе вещественное число");
+				initialFloatX2 = Convert.ToDouble(Console.ReadLine());
+				InitiateFloatSpecificWorkflow(initialFloatX1, initialFloatX2);
 			}
 			else
 			{
-				InitiateGeneralWorkflow();
+				double initialX1;
+				double initialX2;
+				Console.WriteLine("Введите первое число");
+				initialX1 = Convert.ToInt32(Console.ReadLine());
+				Console.WriteLine("Введите второе число");
+				initialX2 = Convert.ToInt32(Console.ReadLine());
+				InitiateGeneralWorkflow(initialX1, initialX2);
 			}
 		}
 
-		private static void InitiateFloatSpecificWorkflow()
+		private static void InitiateFloatSpecificWorkflow(double initialFloatX1, double initialFloatX2)
 		{
-			var firstNumber = BinaryConverter.AssembleBinaryFloatString(mantissa1, initialFloat1Exp, 24, 8);
-			var secondNumber = BinaryConverter.AssembleBinaryFloatString(mantissa2, initialFloat2Exp, 24, 8);
+			var firstNumber = BinaryConverter.TranslateDecimalToBinaryFloat(initialFloatX1);
+			var secondNumber = BinaryConverter.TranslateDecimalToBinaryFloat(initialFloatX2);
 			Console.WriteLine($"\nПервое число: {firstNumber}\nВторое число: {secondNumber}");
-			var result = BinaryCalculator.SumFloatingPointNumbers(firstNumber, secondNumber, 24, 8);
+			var result = BinaryCalculator.SumFloatingPointNumbers(firstNumber, secondNumber);
 
 			Console.WriteLine($"\nСумма = {result}");
 		}
 
-		private static void InitiateGeneralWorkflow()
+		private static void InitiateGeneralWorkflow(double initialX1, double initialX2)
 		{
 			double x1 = initialX1;
 			double x2 = initialX2;
@@ -67,7 +71,7 @@
 
 		private static int GetUserInputVariant()
 		{
-			Console.WriteLine($"Выберите вариант:\n1) Числа 13 и 27\n2) Числа {float1} и {float2}\n");
+			Console.WriteLine($"Выберите вариант:\n1) Операции над целыми числами\n2) Операции над числами с плавающей запятой\n");
 			var key = Console.ReadKey();
 			Console.WriteLine();
 			switch (key.KeyChar)
@@ -149,7 +153,7 @@
 		}
 	}
 
-	enum Code
+	public enum Code
 	{
 		straight,
 		reversed,
