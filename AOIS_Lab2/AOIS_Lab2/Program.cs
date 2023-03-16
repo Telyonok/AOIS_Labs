@@ -14,15 +14,23 @@ namespace AOIS_Lab2
 		const string trueDis = "\\/";
 		static void Main()
 		{
-			Console.WriteLine("Введите логическую функцию:");
-			string? input = Console.ReadLine();
-			if (input == null)
-				return;
-			input = PrepareForWork(input);
-			List<string> operandList = FillOperandList(input);
+			try
+            {
+                Console.WriteLine("Введите логическую функцию:");
+                string? input = Console.ReadLine();
+                if (input == null)
+                    return;
+                input = PrepareForWork(input);
+                List<string> operandList = FillOperandList(input);
 
-			ConverterClass.ExecuteFreeFormToSdnfSknfTask(input, operandList, out string sdnf, out string sknf);
-			//MinimizerClass.ExecuteMinimizeSdnfSknfTask(operandList, sdnf, sknf);
+                ConverterClass.ExecuteFreeFormToSdnfSknfTask(input, operandList, out string sdnf, out string sknf);
+                MinimizerClass.ExecuteMinimizeSdnfSknfTask(operandList, sdnf, sknf);
+            }
+			catch (Exception)
+			{
+				Console.WriteLine("Неверный ввод.");
+				throw;
+			}
 		}
 
 		private static string PrepareForWork(string input)
@@ -51,3 +59,5 @@ namespace AOIS_Lab2
 		}
 	}
 }
+
+//!((!a+!b)*(c+b)*!(!a*c))
