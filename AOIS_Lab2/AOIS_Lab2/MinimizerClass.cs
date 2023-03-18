@@ -8,12 +8,6 @@ namespace AOIS_Lab2
 {
 	internal static class MinimizerClass
 	{
-		const char inv = '!';
-		const char con = '*';
-		const char dis = '+';
-		const string trueCon = "/\\";
-		const string trueDis = "\\/";
-
 		public static void ExecuteMinimizeSdnfSknfTask(List<string> operandList, string sdnf, string sknf)
 		{
 			string minimizedSdnf = MinimizeSdnf(sdnf, operandList);
@@ -24,94 +18,76 @@ namespace AOIS_Lab2
 
 		private static string MinimizeSknf(string sknf, List<string> operandList)
         {
-            List<string> splittedSknf = new List<string>(sknf.Split(con));
+            List<string> splittedSknf = new List<string>(sknf.Split(CharSet.conjunction));
             if (splittedSknf.Count < 2)
                 return sknf;
             StringBuilder stringBuilder = new StringBuilder();
-			GlueSknfParts(splittedSknf, operandList, stringBuilder);
-			GlueSknfParts(stringBuilder.ToString().Split(con).ToList<string>(), operandList, stringBuilder.Clear());
-			return string.Join(con, RemoveRedundantParts(operandList, stringBuilder.ToString().Split(con), dis));
+			GlueParts(splittedSknf, operandList, stringBuilder, true);
+			GlueParts(stringBuilder.ToString().Split(CharSet.conjunction).ToList<string>(), operandList, stringBuilder.Clear(), true);
+			return string.Join(CharSet.conjunction, RemoveRedundantParts(operandList, stringBuilder.ToString().Split(CharSet.conjunction), CharSet.disjunction));
 		}
 
-        private static void GlueSknfParts(List<string> splittedSknf, List<string> operandList, StringBuilder stringBuilder)
-		{
-            foreach (var operand in operandList)
-            {
-                for (int i = 0; i < splittedSknf.Count; i++)
-                {
-                    var replacedPart = splittedSknf[i].Replace(inv + operand, "").Replace(operand, "");
-                    for (int j = i + 1; j < splittedSknf.Count; j++)
-                    {
-                        if (splittedSknf[j].Replace(inv + operand, "").Replace(operand, "") == replacedPart)
-                        {
-                            MergeSknfParts(replacedPart, stringBuilder, splittedSknf, i, j);
-                            break;
-                        }
-                    }
-                }
-            }
-            foreach (string s in splittedSknf)
-                stringBuilder.Append(s).Append(con);
-            stringBuilder.Remove(stringBuilder.Length - 1, 1);
-        }
-
-        private static void MergeSknfParts(string replacedPart, StringBuilder stringBuilder, List<string> splittedSknf, int i, int j)
+        private static void MergeSknfParts(string replacedPart, StringBuilder stringBuilder, List<string> splittedSknf, int index1, int index2)
         {
-            replacedPart = replacedPart.Replace(dis + ")", ")").Replace("(" + dis, "(").Replace(dis + dis.ToString(), dis.ToString());
-            stringBuilder.Append(replacedPart).Append(con);
-            splittedSknf.RemoveAt(i);
-            splittedSknf.RemoveAt(j - 1);
+            replacedPart = replacedPart.Replace(CharSet.disjunction + ")", ")").Replace("(" + CharSet.disjunction, "(").Replace(CharSet.disjunction + CharSet.disjunction.ToString(), CharSet.disjunction.ToString());
+            stringBuilder.Append(replacedPart).Append(CharSet.conjunction);
+            splittedSknf.RemoveAt(index1);
+            splittedSknf.RemoveAt(index2 - 1);
         }
         
-        private static void MergeSdnfParts(string replacedPart, StringBuilder stringBuilder, List<string> splittedSdnf, int i, int j)
+        private static void MergeSdnfParts(string replacedPart, StringBuilder stringBuilder, List<string> splittedSdnf, int index1, int index2)
         {
-            if (replacedPart[0] == con)
+            if (replacedPart[0] == CharSet.conjunction)
                 stringBuilder.Append(replacedPart[1..]);
-            else if (replacedPart[^1] == con)
+            else if (replacedPart[^1] == CharSet.conjunction)
                 stringBuilder.Append(replacedPart[..^1]);
             else
-                stringBuilder.Append(replacedPart.Replace(con + con.ToString(), con.ToString()));
-            stringBuilder.Append(dis);
-            splittedSdnf.RemoveAt(i);
-            splittedSdnf.RemoveAt(j - 1);
+                stringBuilder.Append(replacedPart.Replace(CharSet.conjunction + CharSet.conjunction.ToString(), CharSet.conjunction.ToString()));
+            stringBuilder.Append(CharSet.disjunction);
+            splittedSdnf.RemoveAt(index1);
+            splittedSdnf.RemoveAt(index2 - 1);
         }
 
-        private static void GlueSdnfParts(List<string> splittedSdnf, List<string> operandList, StringBuilder stringBuilder)
-		{
+        private static void GlueParts(List<string> splittedParts, List<string> operandList, StringBuilder stringBuilder, bool isSknf)
+        {
+            char delimiter = isSknf ? CharSet.conjunction : CharSet.disjunction;
             foreach (var operand in operandList)
             {
-                for (int i = 0; i < splittedSdnf.Count; i++)
+                for (int index1 = 0; index1 < splittedParts.Count; index1++)
                 {
-                    var replacedPart = splittedSdnf[i].Replace(inv + operand, "").Replace(operand, "");
-                    for (int j = i + 1; j < splittedSdnf.Count; j++)
+                    var replacedPart = splittedParts[index1].Replace(CharSet.inversion + operand, "").Replace(operand, "");
+                    for (int index2 = index1 + 1; index2 < splittedParts.Count; index2++)
                     {
-                        if (splittedSdnf[j].Replace(inv + operand, "").Replace(operand, "") == replacedPart)
+                        if (splittedParts[index2].Replace(CharSet.inversion + operand, "").Replace(operand, "") == replacedPart)
                         {
-                            MergeSdnfParts(replacedPart, stringBuilder, splittedSdnf, i, j);
+                            if (isSknf)
+                                MergeSknfParts(replacedPart, stringBuilder, splittedParts, index1, index2);
+                            else
+                                MergeSdnfParts(replacedPart, stringBuilder, splittedParts, index1, index2);
                             break;
                         }
                     }
                 }
             }
-            foreach (string s in splittedSdnf)
-                stringBuilder.Append(s).Append(dis);
+            foreach (string part in splittedParts)
+                stringBuilder.Append(part).Append(delimiter);
             stringBuilder.Remove(stringBuilder.Length - 1, 1);
         }
 
-		private static string[] RemoveRedundantParts(List<string> operandList, string[] splittedString, char sign)
+        private static string[] RemoveRedundantParts(List<string> operandList, string[] splittedString, char sign)
 		{
             foreach (var operand in operandList)
             {
-                for (int i = 0; i < splittedString.Length; i++)
+                for (int index1 = 0; index1 < splittedString.Length; index1++)
                 {
-                    if (splittedString[i].Contains(operand))
+                    if (splittedString[index1].Contains(operand))
                     {
-                        var removedInverseS = splittedString[i].Replace(inv + operand, operand);
-                        for (int j = i + 1; j < splittedString.Length; j++)
+                        var removedInverseS = splittedString[index1].Replace(CharSet.inversion + operand, operand);
+                        for (int index2 = index1 + 1; index2 < splittedString.Length; index2++)
                         {
-                            if (splittedString[j].Replace(inv + operand, operand).Contains(removedInverseS.Replace("(","").Replace(")","")))
+                            if (splittedString[index2].Replace(CharSet.inversion + operand, operand).Contains(removedInverseS.Replace("(","").Replace(")","")))
                             {
-                                splittedString[j] = splittedString[j].Replace(inv + operand, operand).Replace(sign + operand, "").Replace(operand + sign, "");
+                                splittedString[index2] = splittedString[index2].Replace(CharSet.inversion + operand, operand).Replace(sign + operand, "").Replace(operand + sign, "");
                             }
                         }
                     }
@@ -122,13 +98,13 @@ namespace AOIS_Lab2
 
 		private static string MinimizeSdnf(string sdnf, List<string> operandList)
         {
-            List<string> splittedSdnf = new List<string>(sdnf.Split(dis));
+            List<string> splittedSdnf = new List<string>(sdnf.Split(CharSet.disjunction));
             if (splittedSdnf.Count < 2)
                 return sdnf;
             StringBuilder stringBuilder = new StringBuilder();
-            GlueSdnfParts(splittedSdnf, operandList, stringBuilder);
-            GlueSdnfParts(stringBuilder.ToString().Split(dis).ToList<string>(), operandList, stringBuilder.Clear());
-            return string.Join(dis, RemoveRedundantParts(operandList, stringBuilder.ToString().Split(dis), con));
+            GlueParts(splittedSdnf, operandList, stringBuilder, false);
+            GlueParts(stringBuilder.ToString().Split(CharSet.disjunction).ToList<string>(), operandList, stringBuilder.Clear(), false);
+            return string.Join(CharSet.disjunction, RemoveRedundantParts(operandList, stringBuilder.ToString().Split(CharSet.disjunction), CharSet.conjunction));
         }
 	}
 }

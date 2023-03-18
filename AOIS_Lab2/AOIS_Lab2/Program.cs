@@ -7,11 +7,6 @@ namespace AOIS_Lab2
 {
 	internal static class Program
 	{
-		const char inv = '!';
-		const char con = '*';
-		const char dis = '+';
-		const string trueCon = "/\\";
-		const string trueDis = "\\/";
 		static void Main()
 		{
 			try
@@ -29,14 +24,13 @@ namespace AOIS_Lab2
 			catch (Exception)
 			{
 				Console.WriteLine("Неверный ввод.");
-				throw;
 			}
 		}
 
 		private static string PrepareForWork(string input)
 		{
-			input = input.Replace(trueDis, dis.ToString());
-			input = input.Replace(trueCon, con.ToString());
+			input = input.Replace(CharSet.trueDisjunction, CharSet.disjunction.ToString());
+			input = input.Replace(CharSet.trueConjunction, CharSet.conjunction.ToString());
 			input = Regex.Replace(input, @"\s+", "");
 			return input;
 		}
@@ -46,13 +40,13 @@ namespace AOIS_Lab2
 			List<string> operandList = new List<string>();
 			input = input.Replace("(", "");
 			input = input.Replace(")", "");
-			input = input.Replace(inv.ToString(), "");
-			input = input.Replace(con, dis);
-			var splittedInput = input.Split(dis);
-			foreach (var e in splittedInput)
+			input = input.Replace(CharSet.inversion.ToString(), "");
+			input = input.Replace(CharSet.conjunction, CharSet.disjunction);
+			var splittedInput = input.Split(CharSet.disjunction);
+			foreach (var operand in splittedInput)
 			{
-				if (!operandList.Contains(e))
-					operandList.Add(e);
+				if (!operandList.Contains(operand))
+					operandList.Add(operand);
 			}
 			operandList.Sort();
 			return operandList;

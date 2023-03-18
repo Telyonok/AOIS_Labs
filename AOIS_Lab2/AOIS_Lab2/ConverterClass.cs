@@ -10,23 +10,20 @@ namespace AOIS_Lab2
 {
 	internal static class ConverterClass
 	{
-		static Dictionary<string, int> setNValues = new()
+		static int[] Weights = { 128, 64, 32, 16, 8, 4, 2, 1 };
+        static string[] Sets = { "000", "001", "010", "011", "100", "101", "110", "111" };
+		static int MaxSetWeight = Weights[0];
+		static Dictionary<string, int> setsAndWeights = new()
 		{
-            {"000", 128},
-            {"001", 64},
-            {"010", 32},
-            {"011", 16},
-            {"100", 8},
-            {"101", 4},
-            {"110", 2},
-            {"111", 1}
+            {Sets[0], Weights[0]},
+            {Sets[1], Weights[1]},
+            {Sets[2], Weights[2]},
+            {Sets[3], Weights[3]},
+            {Sets[4], Weights[4]},
+            {Sets[5], Weights[5]},
+            {Sets[6], Weights[6]},
+            {Sets[7], Weights[7]}
 		};
-
-		const char inv = '!';
-		const char con = '*';
-		const char dis = '+';
-		const string trueCon = "/\\";
-		const string trueDis = "\\/";
 		public static void ExecuteFreeFormToSdnfSknfTask(string input, List<string> operandList, out string sdnf, out string sknf)
 		{
 			Dictionary<int, string> tableIndexSdnfCombinations = FillTableSdnfCombinations(operandList);
@@ -34,76 +31,48 @@ namespace AOIS_Lab2
 			Console.WriteLine();
 			int functionIndex = GetFunctionIndex(input, operandList);
 			Console.WriteLine();
-			sdnf = ConstructSdnf(functionIndex, tableIndexSdnfCombinations);
-            sknf = ConstructSknf(functionIndex, tableIndexSknfCombinations);
-            AssembleNumericForms(out string numericSdnf, out string numericSknf, Convert.ToString(functionIndex, 2).PadLeft(8,'0'));
+            ConstructCompleteForms(functionIndex, tableIndexSknfCombinations, tableIndexSdnfCombinations, out sdnf, out sknf);
+            AssembleNumericForms(out string numericSdnf, out string numericSknf, Convert.ToString(functionIndex, 2).PadLeft(setsAndWeights.Count,'0'));
 			Console.WriteLine($"СДНФ: {PrepareForOutput(sdnf)}\nЧисловая форма: {numericSdnf}\nСКНФ: {PrepareForOutput(sknf)}\nЧисловая форма: {numericSknf}\nИндекс функции: {functionIndex}");
 		}
 
-        private static string ConstructSknf(int functionIndex, Dictionary<int, string> tableIndexSknfCombinations)
+        private static void ConstructCompleteForms(int functionIndex, Dictionary<int, string> tableIndexSknfCombinations, Dictionary<int, string> tableIndexSdnfCombinations, out string sdnf, out string sknf)
         {
-			string sknf = "";
-			int sc = 128;
-            while (sc > 0)
+			sknf = "";
+            sdnf = "";
+            int currentWeight = MaxSetWeight;
+            while (currentWeight > 0)
 			{
-				if (functionIndex < sc)
-					sknf += tableIndexSknfCombinations[sc] + con;
+				if (functionIndex < currentWeight)
+					sknf += tableIndexSknfCombinations[currentWeight] + CharSet.conjunction;
                 else
-                    functionIndex -= sc;
-                sc /= 2;
-			}
-
-			return sknf.Length > 0? sknf[..^1]: "";
-        }
-
-        private static string ConstructSdnf(int functionIndex, Dictionary<int, string> tableIndexSdnfCombinations)
-        {
-            string sdnf = "";
-            int sc = 128;
-            while (sc > 0)
-            {
-                if (functionIndex >= sc)
                 {
-                    sdnf += tableIndexSdnfCombinations[sc] + dis;
-                    functionIndex -= sc;
+                    sdnf += tableIndexSdnfCombinations[currentWeight] + CharSet.disjunction;
+                    functionIndex -= currentWeight;
                 }
-                sc /= 2;
-            }
-
-            return sdnf.Length > 0 ? sdnf[..^1] : "";
+                currentWeight /= 2;
+			}
+            sknf = sknf[..^1];
+            sdnf = sdnf[..^1];
         }
 
         private static string PrepareForOutput(string str)
 		{
-			str = str.Replace(dis.ToString(), trueDis);
-			str = str.Replace(con.ToString(), trueCon);
+			str = str.Replace(CharSet.disjunction.ToString(), CharSet.trueDisjunction);
+			str = str.Replace(CharSet.conjunction.ToString(), CharSet.trueConjunction);
 			return str;
-		}
-
-		private static Dictionary<int, string> FillTableSknfCombinations(List<string> operandList)
-		{
-			Dictionary<int, string> tableCombinations = new Dictionary<int, string>();
-			tableCombinations.Add(128, "(" + operandList[0] + dis + operandList[1] + dis + operandList[2] + ")");
-			tableCombinations.Add(64, "(" + operandList[0] + dis + operandList[1] + dis + inv + operandList[2] + ")");
-			tableCombinations.Add(32, "(" + operandList[0] + dis + inv + operandList[1] + dis + operandList[2] + ")");
-			tableCombinations.Add(16, "(" + operandList[0] + dis + inv + operandList[1] + dis + inv + operandList[2] + ")");
-			tableCombinations.Add(8, "(" + inv + operandList[0] + dis + operandList[1] + dis + operandList[2] + ")");
-			tableCombinations.Add(4, "(" + inv + operandList[0] + dis + operandList[1] + dis + inv + operandList[2] + ")");
-			tableCombinations.Add(2, "(" + inv + operandList[0] + dis + inv + operandList[1] + dis + operandList[2] + ")");
-			tableCombinations.Add(1, "(" + inv + operandList[0] + dis + inv + operandList[1] + dis + inv + operandList[2] + ")");
-			return tableCombinations;
 		}
 
 		private static void AssembleNumericForms(out string numericSdnf, out string numericSknf, string index)
 		{
-			numericSdnf = trueDis + "(";
-			numericSknf = trueCon + "(";
-			for (int i = 0; i < index.Length; i++)
+			numericSdnf = CharSet.trueDisjunction + "(";
+			numericSknf = CharSet.trueConjunction + "(";
+			for (int index1 = 0; index1 < index.Length; index1++)
 			{
-				if (index[i] == '1')
-					numericSdnf += i.ToString() + ',';
+				if (index[index1] == '1')
+					numericSdnf += index1.ToString() + ',';
 				else
-					numericSknf += i.ToString() + ",";
+					numericSknf += index1.ToString() + ",";
 			}
 			numericSdnf = numericSdnf[..^1] + ")";
 			numericSknf = numericSknf[..^1] + ")";
@@ -113,14 +82,14 @@ namespace AOIS_Lab2
 		{
 			int index = 0;
             Console.WriteLine("Таблица:");
-            for (int i = 0; i < setNValues.Count; i++)
+            for (int index1 = 0; index1 < setsAndWeights.Count; index1++)
             {
-                var set = setNValues.Keys.ElementAt(i);
+                var set = setsAndWeights.Keys.ElementAt(index1);
                 Console.Write($"{set}: ");
                 string temp = input.Replace(operandList[0], set[0].ToString()).Replace(operandList[1], set[1].ToString()).Replace(operandList[2], set[2].ToString());
 				if (Evaluate(temp) == "1")
                 {
-                    index += setNValues[set];
+                    index += setsAndWeights[set];
                     Console.WriteLine("1");
                 }
                 else
@@ -136,35 +105,53 @@ namespace AOIS_Lab2
 			if (temp.Length == 1)
 				return temp;
             Stack<int> openBracketIndex = new Stack<int>();
-            for (int j = 0; j < temp.Length; j++)
+            for (int index2 = 0; index2 < temp.Length; index2++)
             {
-                if (temp[j] == '(')
-                    openBracketIndex.Push(j);
-                else if (temp[j] == ')')
+                if (temp[index2] == '(')
+                    openBracketIndex.Push(index2);
+                else if (temp[index2] == ')')
                 {
 					int index = openBracketIndex.Pop();
-                    int length = j - index + 1;
-                    temp = temp.Substring(0, index) + Evaluate(temp.Substring(index, length)) + temp.Substring(j + 1);
-					j = index;
+                    int length = index2 - index + 1;
+                    temp = temp.Substring(0, index) + Evaluate(temp.Substring(index, length)) + temp.Substring(index2 + 1);
+					index2 = index;
                 }
             }
-            temp = temp.Replace(inv + "0", "1").Replace(inv + "1", "0");
-            return (temp.Contains(dis) && temp.Contains("1")) || !temp.Contains("0")? "1" : "0";
+            temp = temp.Replace(CharSet.inversion + "0", "1").Replace(CharSet.inversion + "1", "0");
+            return (temp.Contains(CharSet.disjunction) && temp.Contains("1")) || !temp.Contains("0")? "1" : "0";
         }
 
 		private static Dictionary<int, string> FillTableSdnfCombinations(List<string> operandList)
 		{
-			Dictionary<int, string> tableCombinations = new Dictionary<int, string>();
-			tableCombinations.Add(128, inv + operandList[0] + con + inv + operandList[1] + con + inv + operandList[2]);
-			tableCombinations.Add(64, inv + operandList[0] + con + inv + operandList[1] + con + operandList[2]);
-			tableCombinations.Add(32, inv + operandList[0] + con + operandList[1] + con + inv + operandList[2]);
-			tableCombinations.Add(16, inv + operandList[0] + con + operandList[1] + con + operandList[2]);
-			tableCombinations.Add(8, operandList[0] + con + inv + operandList[1] + con + inv + operandList[2]);
-			tableCombinations.Add(4, operandList[0] + con + inv + operandList[1] + con + operandList[2]);
-			tableCombinations.Add(2, operandList[0] + con + operandList[1] + con + inv + operandList[2]);
-			tableCombinations.Add(1, operandList[0] + con + operandList[1] + con + operandList[2]);
-			return tableCombinations;
-		}
+            Dictionary<int, string> tableCombinations = new Dictionary<int, string>
+            {
+                { Weights[0], CharSet.inversion + operandList[0] + CharSet.conjunction + CharSet.inversion + operandList[1] + CharSet.conjunction + CharSet.inversion + operandList[2] },
+                { Weights[1], CharSet.inversion + operandList[0] + CharSet.conjunction + CharSet.inversion + operandList[1] + CharSet.conjunction + operandList[2] },
+                { Weights[2], CharSet.inversion + operandList[0] + CharSet.conjunction + operandList[1] + CharSet.conjunction + CharSet.inversion + operandList[2] },
+                { Weights[3], CharSet.inversion + operandList[0] + CharSet.conjunction + operandList[1] + CharSet.conjunction + operandList[2] },
+                { Weights[4], operandList[0] + CharSet.conjunction + CharSet.inversion + operandList[1] + CharSet.conjunction + CharSet.inversion + operandList[2] },
+                { Weights[5], operandList[0] + CharSet.conjunction + CharSet.inversion + operandList[1] + CharSet.conjunction + operandList[2] },
+                { Weights[6], operandList[0] + CharSet.conjunction + operandList[1] + CharSet.conjunction + CharSet.inversion + operandList[2] },
+                { Weights[7], operandList[0] + CharSet.conjunction + operandList[1] + CharSet.conjunction + operandList[2] }
+            };
+            return tableCombinations;
+        }
+
+        private static Dictionary<int, string> FillTableSknfCombinations(List<string> operandList)
+        {
+            Dictionary<int, string> tableCombinations = new Dictionary<int, string>
+            {
+                { Weights[0], "(" + operandList[0] + CharSet.disjunction + operandList[1] + CharSet.disjunction + operandList[2] + ")" },
+                { Weights[1], "(" + operandList[0] + CharSet.disjunction + operandList[1] + CharSet.disjunction + CharSet.inversion + operandList[2] + ")" },
+                { Weights[2], "(" + operandList[0] + CharSet.disjunction + CharSet.inversion + operandList[1] + CharSet.disjunction + operandList[2] + ")" },
+                { Weights[3], "(" + operandList[0] + CharSet.disjunction + CharSet.inversion + operandList[1] + CharSet.disjunction + CharSet.inversion + operandList[2] + ")" },
+                { Weights[4], "(" + CharSet.inversion + operandList[0] + CharSet.disjunction + operandList[1] + CharSet.disjunction + operandList[2] + ")" },
+                { Weights[5], "(" + CharSet.inversion + operandList[0] + CharSet.disjunction + operandList[1] + CharSet.disjunction + CharSet.inversion + operandList[2] + ")" },
+                { Weights[6], "(" + CharSet.inversion + operandList[0] + CharSet.disjunction + CharSet.inversion + operandList[1] + CharSet.disjunction + operandList[2] + ")" },
+                { Weights[7], "(" + CharSet.inversion + operandList[0] + CharSet.disjunction + CharSet.inversion + operandList[1] + CharSet.disjunction + CharSet.inversion + operandList[2] + ")" }
+            };
+            return tableCombinations;
+        }
     }
 }
 
