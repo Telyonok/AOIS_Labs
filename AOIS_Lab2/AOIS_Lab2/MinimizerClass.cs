@@ -75,7 +75,7 @@ namespace AOIS_Lab2
         }
 
         private static string[] RemoveRedundantParts(List<string> operandList, string[] splittedString, char sign)
-		{
+        {
             foreach (var operand in operandList)
             {
                 for (int index1 = 0; index1 < splittedString.Length; index1++)
@@ -94,9 +94,9 @@ namespace AOIS_Lab2
                 }
             }
             return splittedString;
-		}
+        }
 
-		private static string MinimizeSdnf(string sdnf, List<string> operandList)
+        private static string MinimizeSdnf(string sdnf, List<string> operandList)
         {
             List<string> splittedSdnf = new List<string>(sdnf.Split(CharSet.disjunction));
             if (splittedSdnf.Count < 2)
@@ -106,5 +106,5 @@ namespace AOIS_Lab2
             GlueParts(stringBuilder.ToString().Split(CharSet.disjunction).ToList<string>(), operandList, stringBuilder.Clear(), false);
             return string.Join(CharSet.disjunction, RemoveRedundantParts(operandList, stringBuilder.ToString().Split(CharSet.disjunction), CharSet.conjunction));
         }
-	}
+    }
 }
