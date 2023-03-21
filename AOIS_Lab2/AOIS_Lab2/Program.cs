@@ -7,17 +7,17 @@ namespace AOIS_Lab2
 		static void Main()
 		{
 			try
-            {
-                Console.WriteLine("Введите логическую функцию:");
-                string? input = Console.ReadLine();
-                if (input == null)
-                    return;
-                input = PrepareForWork(input);
-                List<string> operandList = FillOperandList(input);
+            		{
+                		Console.WriteLine("Введите логическую функцию:");
+                		string? input = Console.ReadLine();
+                		if (input == null)
+                    			return;
+                		input = PrepareForWork(input);
+                		List<string> operandList = FillOperandList(input);
 
-                ConverterClass.ExecuteFreeFormToSdnfSknfTask(input, operandList, out string sdnf, out string sknf);
-                MinimizerClass.ExecuteMinimizeSdnfSknfTask(operandList, sdnf, sknf);
-            }
+                		ConverterClass.ExecuteFreeFormToSdnfSknfTask(input, operandList, out string sdnf, out string sknf);
+                		MinimizerClass.ExecuteMinimizeSdnfSknfTask(operandList, sdnf, sknf);
+            		}
 			catch (Exception)
 			{
 				Console.WriteLine("Неверный ввод.");
