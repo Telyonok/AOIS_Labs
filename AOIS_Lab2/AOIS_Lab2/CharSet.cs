@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace AOIS_Lab2
+﻿namespace AOIS_Lab2
 {
     internal static class CharSet
     {

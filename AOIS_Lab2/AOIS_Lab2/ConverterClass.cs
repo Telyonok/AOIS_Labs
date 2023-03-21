@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
-using System.Text;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-
-namespace AOIS_Lab2
+﻿namespace AOIS_Lab2
 {
 	internal static class ConverterClass
 	{
@@ -38,7 +30,7 @@ namespace AOIS_Lab2
 
         private static void ConstructCompleteForms(int functionIndex, Dictionary<int, string> tableIndexSknfCombinations, Dictionary<int, string> tableIndexSdnfCombinations, out string sdnf, out string sknf)
         {
-			sknf = "";
+            sknf = "";
             sdnf = "";
             int currentWeight = MaxSetWeight;
             while (currentWeight > 0)
@@ -56,23 +48,23 @@ namespace AOIS_Lab2
             sdnf = sdnf[..^1];
         }
 
-        private static string PrepareForOutput(string str)
+        private static string PrepareForOutput(string formula)
 		{
-			str = str.Replace(CharSet.disjunction.ToString(), CharSet.trueDisjunction);
-			str = str.Replace(CharSet.conjunction.ToString(), CharSet.trueConjunction);
-			return str;
+			formula = formula.Replace(CharSet.disjunction.ToString(), CharSet.trueDisjunction);
+			formula = formula.Replace(CharSet.conjunction.ToString(), CharSet.trueConjunction);
+			return formula;
 		}
 
 		private static void AssembleNumericForms(out string numericSdnf, out string numericSknf, string index)
 		{
 			numericSdnf = CharSet.trueDisjunction + "(";
 			numericSknf = CharSet.trueConjunction + "(";
-			for (int index1 = 0; index1 < index.Length; index1++)
+			for (int charIterator = 0; charIterator < index.Length; charIterator++)
 			{
-				if (index[index1] == '1')
-					numericSdnf += index1.ToString() + ',';
+				if (index[charIterator] == '1')
+					numericSdnf += charIterator.ToString() + ',';
 				else
-					numericSknf += index1.ToString() + ",";
+					numericSknf += charIterator.ToString() + ",";
 			}
 			numericSdnf = numericSdnf[..^1] + ")";
 			numericSknf = numericSknf[..^1] + ")";
@@ -82,12 +74,12 @@ namespace AOIS_Lab2
 		{
 			int index = 0;
             Console.WriteLine("Таблица:");
-            for (int index1 = 0; index1 < setsAndWeights.Count; index1++)
+            for (int setIterator = 0; setIterator < setsAndWeights.Count; setIterator++)
             {
-                var set = setsAndWeights.Keys.ElementAt(index1);
+                var set = setsAndWeights.Keys.ElementAt(setIterator);
                 Console.Write($"{set}: ");
-                string temp = input.Replace(operandList[0], set[0].ToString()).Replace(operandList[1], set[1].ToString()).Replace(operandList[2], set[2].ToString());
-				if (Evaluate(temp) == "1")
+                string formula = input.Replace(operandList[0], set[0].ToString()).Replace(operandList[1], set[1].ToString()).Replace(operandList[2], set[2].ToString());
+                if (Evaluate(formula) == "1")
                 {
                     index += setsAndWeights[set];
                     Console.WriteLine("1");
@@ -95,34 +87,34 @@ namespace AOIS_Lab2
                 else
                     Console.WriteLine("0");
             }
-			return index;
-		}
-
-		private static string Evaluate(string temp)
-		{
-			if (temp[0] == '(' && temp[^1] == ')')
-				temp = temp[1..^1];
-			if (temp.Length == 1)
-				return temp;
-            Stack<int> openBracketIndex = new Stack<int>();
-            for (int index2 = 0; index2 < temp.Length; index2++)
-            {
-                if (temp[index2] == '(')
-                    openBracketIndex.Push(index2);
-                else if (temp[index2] == ')')
-                {
-					int index = openBracketIndex.Pop();
-                    int length = index2 - index + 1;
-                    temp = temp.Substring(0, index) + Evaluate(temp.Substring(index, length)) + temp.Substring(index2 + 1);
-					index2 = index;
-                }
-            }
-            temp = temp.Replace(CharSet.inversion + "0", "1").Replace(CharSet.inversion + "1", "0");
-            return (temp.Contains(CharSet.disjunction) && temp.Contains("1")) || !temp.Contains("0")? "1" : "0";
+            return index;
         }
 
-		private static Dictionary<int, string> FillTableSdnfCombinations(List<string> operandList)
-		{
+        private static string Evaluate(string formula)
+        {
+            if (formula[0] == '(' && formula[^1] == ')')
+                formula = formula[1..^1];
+            if (formula.Length == 1)
+                return formula;
+            Stack<int> openBracketIndex = new Stack<int>();
+            for (int charIterator = 0; charIterator < formula.Length; charIterator++)
+            {
+                if (formula[charIterator] == '(')
+                    openBracketIndex.Push(charIterator);
+                else if (formula[charIterator] == ')')
+                {
+                    int bracketIndex = openBracketIndex.Pop();
+                    int length = charIterator - bracketIndex + 1;
+                    formula = formula.Substring(0, bracketIndex) + Evaluate(formula.Substring(bracketIndex, length)) + formula.Substring(charIterator + 1);
+                    charIterator = bracketIndex;
+                }
+            }
+            formula = formula.Replace(CharSet.inversion + "0", "1").Replace(CharSet.inversion + "1", "0");
+            return (formula.Contains(CharSet.disjunction) && formula.Contains("1")) || !formula.Contains("0")? "1" : "0";
+        }
+
+        private static Dictionary<int, string> FillTableSdnfCombinations(List<string> operandList)
+        {
             Dictionary<int, string> tableCombinations = new Dictionary<int, string>
             {
                 { Weights[0], CharSet.inversion + operandList[0] + CharSet.conjunction + CharSet.inversion + operandList[1] + CharSet.conjunction + CharSet.inversion + operandList[2] },

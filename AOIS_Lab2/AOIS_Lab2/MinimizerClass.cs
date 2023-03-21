@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace AOIS_Lab2
 {
@@ -53,17 +49,17 @@ namespace AOIS_Lab2
             char delimiter = isSknf ? CharSet.conjunction : CharSet.disjunction;
             foreach (var operand in operandList)
             {
-                for (int index1 = 0; index1 < splittedParts.Count; index1++)
+                for (int partIterator1 = 0; partIterator1 < splittedParts.Count; partIterator1++)
                 {
-                    var replacedPart = splittedParts[index1].Replace(CharSet.inversion + operand, "").Replace(operand, "");
-                    for (int index2 = index1 + 1; index2 < splittedParts.Count; index2++)
+                    var replacedPart = splittedParts[partIterator1].Replace(CharSet.inversion + operand, "").Replace(operand, "");
+                    for (int partIterator2 = partIterator1 + 1; partIterator2 < splittedParts.Count; partIterator2++)
                     {
-                        if (splittedParts[index2].Replace(CharSet.inversion + operand, "").Replace(operand, "") == replacedPart)
+                        if (splittedParts[partIterator2].Replace(CharSet.inversion + operand, "").Replace(operand, "") == replacedPart)
                         {
                             if (isSknf)
-                                MergeSknfParts(replacedPart, stringBuilder, splittedParts, index1, index2);
+                                MergeSknfParts(replacedPart, stringBuilder, splittedParts, partIterator1, partIterator2);
                             else
-                                MergeSdnfParts(replacedPart, stringBuilder, splittedParts, index1, index2);
+                                MergeSdnfParts(replacedPart, stringBuilder, splittedParts, partIterator1, partIterator2);
                             break;
                         }
                     }
@@ -78,12 +74,12 @@ namespace AOIS_Lab2
         {
             foreach (var operand in operandList)
             {
-                for (int index1 = 0; index1 < splittedString.Length; index1++)
+                for (int partIterator = 0; partIterator < splittedString.Length; partIterator++)
                 {
-                    if (splittedString[index1].Contains(operand))
+                    if (splittedString[partIterator].Contains(operand))
                     {
-                        var removedInverseS = splittedString[index1].Replace(CharSet.inversion + operand, operand);
-                        for (int index2 = index1 + 1; index2 < splittedString.Length; index2++)
+                        var removedInverseS = splittedString[partIterator].Replace(CharSet.inversion + operand, operand);
+                        for (int index2 = partIterator + 1; index2 < splittedString.Length; index2++)
                         {
                             if (splittedString[index2].Replace(CharSet.inversion + operand, operand).Contains(removedInverseS.Replace("(","").Replace(")","")))
                             {
