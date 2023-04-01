@@ -14,16 +14,16 @@ namespace AOIS_Lab2
 			Console.WriteLine($"Минимизированная СКНФ {minimizedSknf}");
 		}
 
-		public static string MinimizeSknf(string sknf, List<string> operandList)
+	public static string MinimizeSknf(string sknf, List<string> operandList)
         {
-            List<string> splittedSknf = new List<string>(sknf.Split(CharSet.conjunction));
-            if (splittedSknf.Count < 2)
-                return sknf;
-            StringBuilder stringBuilder = new StringBuilder();
-			GlueParts(splittedSknf, operandList, stringBuilder, true);
-			GlueParts(stringBuilder.ToString().Split(CharSet.conjunction).ToList<string>(), operandList, stringBuilder.Clear(), true);
-			return string.Join(CharSet.conjunction, RemoveRedundantParts(operandList, stringBuilder.ToString().Split(CharSet.conjunction), CharSet.disjunction));
-		}
+        	List<string> splittedSknf = new List<string>(sknf.Split(CharSet.conjunction));
+        	if (splittedSknf.Count < 2)
+                	return sknf;
+         	StringBuilder stringBuilder = new StringBuilder();
+	 	GlueParts(splittedSknf, operandList, stringBuilder, true);
+	    	GlueParts(stringBuilder.ToString().Split(CharSet.conjunction).ToList<string>(), operandList, stringBuilder.Clear(), true);
+	    	return string.Join(CharSet.conjunction, RemoveRedundantParts(operandList, stringBuilder.ToString().Split(CharSet.conjunction), CharSet.disjunction));
+	}
 
         private static void MergeSknfParts(string replacedPart, StringBuilder stringBuilder, List<string> splittedSknf, int index1, int index2)
         {
