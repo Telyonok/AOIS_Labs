@@ -2,7 +2,7 @@
 
 namespace AOIS_Lab2
 {
-	internal static class MinimizerClass
+	public static class MinimizerClass
 	{
 		public static void ExecuteMinimizeSdnfSknfTask(List<string> operandList, string sdnf, string sknf)
 		{

@@ -1,6 +1,6 @@
 ﻿namespace AOIS_Lab2
 {
-	internal static class ConverterClass
+	public static class ConverterClass
 	{
 		static int[] Weights = { 128, 64, 32, 16, 8, 4, 2, 1 };
         static string[] Sets = { "000", "001", "010", "011", "100", "101", "110", "111" };

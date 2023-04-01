@@ -31,23 +31,6 @@ namespace AOIS_Lab2
 			input = Regex.Replace(input, @"\s+", "");
 			return input;
 		}
-
-		private static List<string> FillOperandList(string input)
-		{
-			List<string> operandList = new List<string>();
-			input = input.Replace("(", "");
-			input = input.Replace(")", "");
-			input = input.Replace(CharSet.inversion.ToString(), "");
-			input = input.Replace(CharSet.conjunction, CharSet.disjunction);
-			var splittedInput = input.Split(CharSet.disjunction);
-			foreach (var operand in splittedInput)
-			{
-				if (!operandList.Contains(operand))
-					operandList.Add(operand);
-			}
-			operandList.Sort();
-			return operandList;
-		}
 	}
 }
 
