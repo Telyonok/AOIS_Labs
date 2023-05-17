@@ -2,17 +2,43 @@
 {
     internal class Program
     {
+        static void printVector(List<int> vector)
+        {
+            foreach (var bit in vector)
+            {
+                Console.Write(bit);
+                Console.Write(" ");
+            }
+            Console.WriteLine();
+            Console.WriteLine();
+        }
+
         static void Main()
         {
             List<List<int>> matrix = GenerateMatrix(8, 3);
-            List<int> vector = GenerateVector(3);
+            Console.WriteLine("Сгенерированная матрица:");
             Print(matrix);
-            var a = Compare(matrix, matrix[1]);
+            List<int> vector = GenerateVector(3);
+            Console.WriteLine("Сгенерированный вектор:");
+            printVector(vector);
+            var a = Compare(matrix, vector);
+            Console.WriteLine("Результат сравнения матрицы с вектором:");
+            printVector(a);
             var b = FilterWithRange(matrix, matrix[0], matrix[1]);
-            var c = FilterWithFunction(matrix, matrix[2], XOR);
-            var d = FilterWithFunction(matrix, matrix[2], OR);
-            var e = FilterWithFunction(matrix, matrix[2], AND);
-            var f = FilterWithFunction(matrix, matrix[2], Equivalance);
+            Console.WriteLine("Результат поиска с границами matrix[0] и matrix[1]:");
+            printVector(b);
+            var c = FilterWithFunction(matrix, XOR);
+            Console.WriteLine("Результат поиска функцией XOR:");
+            printVector(c);
+            var d = FilterWithFunction(matrix, OR);
+            Console.WriteLine("Результат поиска функцией OR:");
+            printVector(d);
+            var e = FilterWithFunction(matrix, AND);
+            Console.WriteLine("Результат поиска функцией AND:");
+            printVector(e);
+            var f = FilterWithFunction(matrix, Equivalance);
+            Console.WriteLine("Результат поиска функцией эквиваленции:");
+            printVector(f);
         }
 
         public static void Print(List<List<int>> matrix)
@@ -75,7 +101,7 @@
             return output;
         }
 
-        public static List<int> FilterWithFunction(List<List<int>> matrix, List<int> mask, Func<List<int>, List<int>, List<int>, bool> filterFunction)
+        public static List<int> FilterWithFunction(List<List<int>> matrix, Func<List<int>, List<int>, List<int>, bool> filterFunction)
         {
             List<int> output = new List<int>();
             int wordPartLength = matrix[0].Count / 3;
